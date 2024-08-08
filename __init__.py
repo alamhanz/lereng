@@ -1,1 +1,1 @@
-from .sample import shapefile_sample
+from .inspection import shapefile_sample
