@@ -64,7 +64,12 @@
                 .attr("fill", d => colorScale(d.properties.reg_value))
                 .attr("stroke", "#000")
                 .attr("stroke-width", 0.5)
-                .on("mouseover", (event, d) => {
+                .on("mouseover", function (event, d) {
+                    // Darken the hovered region
+                    d3.select(this)
+                        .attr("fill", d3.color(colorScale(d.properties.reg_value)).darker(1)); // Make it darker
+                    
+                    // Show tooltip
                     tooltip.style("visibility", "visible")
                         .html(`
                             <strong>${d.properties.regional_name}</strong><br>
@@ -75,7 +80,12 @@
                     tooltip.style("top", `${event.pageY + 10}px`)
                         .style("left", `${event.pageX + 10}px`);
                 })
-                .on("mouseout", () => {
+                .on("mouseout", function (event, d) {
+                    // Restore the original color
+                    d3.select(this)
+                        .attr("fill", colorScale(d.properties.reg_value));
+                    
+                    // Hide tooltip
                     tooltip.style("visibility", "hidden");
                 });
         });
