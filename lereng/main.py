@@ -1,27 +1,38 @@
 import os
+import shutil
 
 import geopandas as gpd
 import pandas as pd
 
-PATH_MAPS = os.path.join("materials", "indonesia_maps")
+PATH_ABS = os.path.dirname(os.path.abspath(__file__))
+PATH_MATERIALS = os.path.join(PATH_ABS, "materials")
+PATH_MAPS = os.path.join(PATH_ABS, "materials", "indonesia_maps")
+PATH_SAMPLE = os.path.join(PATH_ABS, "sample")
 
 
 class chrmap:
     def __init__(self):
-        pass
-
-    def insert(self, data, level="provinsi"):
         # Load SHP file
         self.shp_indo = {}
         for m in os.listdir(PATH_MAPS):
-            self.shp_indo[m.split("-")[0].lower()] = gpd.read_file(
-                os.path.join(PATH_MAPS, m)
-            )
+            dtemp = gpd.read_file(os.path.join(PATH_MAPS, m))
+            dtemp.columns = [c.lower() for c in dtemp.columns]
+            self.shp_indo[m.split("-")[0].lower()] = dtemp
+
+    def insert(self, data, level="provinsi", path="temp_viz1"):
+        data.columns = [c.lower() for c in data.columns]
 
         # Merge SHP and DataFrame on shp_file_name
-        geojson = self.shp_indo["level"].merge(
-            data, left_on="shp_file_name", right_on="shp_file_name"
-        )
+        geojson = self.shp_indo[level].merge(data, left_on=level, right_on=level)
+        geojson.to_file(os.path.join(path, "map_with_data.geojson"), driver="GeoJSON")
 
-        # Export to GeoJSON
-        geojson.to_file("map_with_data.geojson", driver="GeoJSON")
+        # Copy template as well
+        for i in ["html", "js"]:
+            shutil.copy(
+                os.path.join(PATH_MATERIALS, f"lereng_viz.{i}"),
+                os.path.join(path, f"lereng_viz.{i}"),
+            )
+
+
+def datasample(name):
+    return pd.read_csv(os.path.join(PATH_SAMPLE, name))
