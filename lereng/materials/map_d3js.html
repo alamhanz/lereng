@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map with D3.js</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
+        .map {
+            width: 80%;
+            height: 80%;
+        }
+
+        .tooltip {
+            position: absolute;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 5px;
+            pointer-events: none;
+            font-size: 12px;
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="tooltip" id="tooltip"></div>
+    <svg class="map"></svg>
+    <script>
+        // Set SVG dimensions
+        const svg = d3.select(".map");
+        const width = parseFloat(svg.style("width"));
+        const height = parseFloat(svg.style("height"));
+        svg.attr("viewBox", `0 0 ${width} ${height}`);
+
+        // Create tooltip element
+        const tooltip = d3.select("#tooltip");
+
+        // Load GeoJSON file
+        d3.json("map_testing.geojson").then(function (geojson) {
+            // Define projection and path generator
+            const projection = d3.geoMercator().fitSize([width, height], geojson);
+            const path = d3.geoPath().projection(projection);
+
+            // Define color scale based on 'reg_value'
+            const colorScale = d3.scaleSequential(d3.interpolateBlues)
+                .domain(d3.extent(geojson.features, d => d.properties.reg_value));
+
+            // Draw map
+            svg.selectAll("path")
+                .data(geojson.features)
+                .enter()
+                .append("path")
+                .attr("d", path)
+                .attr("fill", d => colorScale(d.properties.reg_value))
+                .attr("stroke", "#000")
+                .attr("stroke-width", 0.5)
+                .on("mouseover", function (event, d) {
+                    // Darken the hovered region
+                    d3.select(this)
+                        .attr("fill", d3.color(colorScale(d.properties.reg_value)).darker(1)); // Make it darker
+                    
+                    // Show tooltip
+                    tooltip.style("visibility", "visible")
+                        .html(`
+                            <strong>${d.properties.regional_name}</strong><br>
+                            Value: ${d.properties.reg_value}
+                        `);
+                })
+                .on("mousemove", (event) => {
+                    tooltip.style("top", `${event.pageY + 10}px`)
+                        .style("left", `${event.pageX + 10}px`);
+                })
+                .on("mouseout", function (event, d) {
+                    // Restore the original color
+                    d3.select(this)
+                        .attr("fill", colorScale(d.properties.reg_value));
+                    
+                    // Hide tooltip
+                    tooltip.style("visibility", "hidden");
+                });
+        });
+    </script>
+</body>
+</html>
