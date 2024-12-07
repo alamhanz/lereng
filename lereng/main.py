@@ -19,12 +19,29 @@ class chrmap:
             dtemp.columns = [c.lower() for c in dtemp.columns]
             self.shp_indo[m.split("-")[0].lower()] = dtemp
 
-    def insert(self, data, level="provinsi", path="temp_viz1"):
+    def insert(self, data, level="provinsi", metric=None, path="temp_viz"):
         data.columns = [c.lower() for c in data.columns]
+        data["numbers"] = data[metric]
 
         # Merge SHP and DataFrame on shp_file_name
-        geojson = self.shp_indo[level].merge(data, left_on=level, right_on=level)
+        geojson = self.shp_indo[level].merge(
+            data[[level, "numbers"]], left_on=level, right_on=level
+        )
+        # geojson = geojson.set_geometry("geometry")
+        # bounds = geojson.total_bounds
+        # min_longitude, min_latitude, max_longitude, max_latitude = bounds
+        # 11 Bengkulu ()
+        # 18 Jawa Timur (35)
+
+        geojson = geojson.dropna()
+        # geojson = geojson[
+        #     ~(geojson.provinsi.isin(["Jawa Timur", "Maluku Utara", "Maluku"]))
+        # ]
+        # geojson = geojson[:10]
+        print(geojson)
+
         geojson.to_file(os.path.join(path, "map_with_data.geojson"), driver="GeoJSON")
+        print(f"save in {os.path.join(path, 'map_with_data.geojson')}")
 
         # Copy template as well
         for i in ["html", "js"]:
