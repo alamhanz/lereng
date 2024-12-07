@@ -14,11 +14,18 @@ def shapefile_sample():
 
 
 all_levels = ["Provinsi", "Kab_Kota", "Kecamatan"]
+all_levels_name = ["provinsi", "kabupaten_kota", "kecamatan"]
+all_name = dict(zip(all_levels, all_levels_name))
 for lvl in all_levels:
     geodf = gpd.read_file(os.path.join("maps", lvl, f"{lvl}.shp"))
     geodf["geometry"] = geodf["geometry"].simplify(
-        tolerance=0.005, preserve_topology=True
+        # tolerance=0.001, preserve_topology=True
+        tolerance=0.001,
+        preserve_topology=True,
     )
 
     # Save to GeoJSON
-    geodf.to_file(f"lereng/materials/{lvl}-light.geojson", driver="GeoJSON")
+    geodf.to_file(
+        f"lereng/materials/indonesia_maps/{all_name[lvl]}-light.geojson",
+        driver="GeoJSON",
+    )
