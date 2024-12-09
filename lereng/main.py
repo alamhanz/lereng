@@ -22,23 +22,15 @@ class chrmap:
     def insert(self, data, level="provinsi", metric=None, path="temp_viz"):
         data.columns = [c.lower() for c in data.columns]
         data["numbers"] = data[metric]
+        level_name = "kab_kota" if level == "kabupaten_kota" else level
 
         # Merge SHP and DataFrame on shp_file_name
         geojson = self.shp_indo[level].merge(
-            data[[level, "numbers"]], left_on=level, right_on=level
+            data[[level_name, "numbers"]], on=level_name
         )
-        # geojson = geojson.set_geometry("geometry")
-        # bounds = geojson.total_bounds
-        # min_longitude, min_latitude, max_longitude, max_latitude = bounds
-        # 11 Bengkulu ()
-        # 18 Jawa Timur (35)
 
-        geojson = geojson.dropna()
-        geojson["area_name"] = geojson[level]
-        # geojson = geojson[
-        #     ~(geojson.provinsi.isin(["Jawa Timur", "Maluku Utara", "Maluku"]))
-        # ]
-        # geojson = geojson[:10]
+        # geojson = geojson.dropna()
+        geojson["area_name"] = geojson[level_name]
         print(geojson)
 
         geojson.to_file(os.path.join(path, "map_with_data.geojson"), driver="GeoJSON")
