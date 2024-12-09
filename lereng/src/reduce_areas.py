@@ -17,11 +17,11 @@ all_levels = ["Provinsi", "Kab_Kota", "Kecamatan"]
 all_levels_name = ["provinsi", "kabupaten_kota", "kecamatan"]
 all_name = dict(zip(all_levels, all_levels_name))
 for lvl in all_levels:
-    geodf = gpd.read_file(os.path.join("maps", lvl, f"{lvl}.shp"))
+    geodf = gpd.read_file(os.path.join("maps", "shp", lvl, f"{lvl}.shp"))
     geodf["geometry"] = geodf["geometry"].simplify(
         # tolerance=0.001, preserve_topology=True
-        tolerance=0.001,
-        preserve_topology=True,
+        tolerance=0.0093,
+        preserve_topology=False,
     )
 
     # Save to GeoJSON

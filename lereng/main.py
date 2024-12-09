@@ -34,6 +34,7 @@ class chrmap:
         # 18 Jawa Timur (35)
 
         geojson = geojson.dropna()
+        geojson["area_name"] = geojson[level]
         # geojson = geojson[
         #     ~(geojson.provinsi.isin(["Jawa Timur", "Maluku Utara", "Maluku"]))
         # ]
