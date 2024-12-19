@@ -2,17 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Map with D3.js</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoJSON Map Visualization with Zoom</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        .map {
-            width: 800px;
-            height: 600px;
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 8px;
+            font-size: 12px;
+            pointer-events: none;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+        }
+        .hovered {
+            filter: brightness(0.8); /* Darken on hover */
         }
     </style>
 </head>
 <body>
-    <svg class="map"></svg>
-    <script src="lereng_viz.js"></script>
+    <svg id="map" width="800" height="600"></svg>
+    <script>
+        // Set up SVG dimensions
+        const width = 800;
+        const height = 600;
+
+        // Create SVG container
+        const svg = d3.select("#map")
+            .attr("width", width)
+            .attr("height", height);
+
+        // Create a group for the map content
+        const mapGroup = svg.append("g");
+
+        // Define a color scale
+        const colorScale = d3.scaleSequential(d3.interpolateBlues)
+            .domain([0, 100]); // Adjust the domain based on your data range
+
+        // Create a projection and path generator
+        const projection = d3.geoMercator()
+            .translate([width / 2, height / 2])
+            .scale(100);
+
+        const path = d3.geoPath().projection(projection);
+
+        // Create a tooltip
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        // Zoom functionality
+        const zoom = d3.zoom()
+            .scaleExtent([1, 8]) // Zoom scale: 1x to 8x
+            .on("zoom", (event) => {
+                mapGroup.attr("transform", event.transform);
+            });
+
+        svg.call(zoom);
+
+        // Define a color scale dynamically based on the data
+        // Load and render GeoJSON data
+        d3.json("map_with_data.geojson").then(function(data) {
+            // Extract all numbers and dynamically set the color scale domain
+            const numbers = data.features.map(d => d.properties.numbers || 0);
+            const colorScale = d3.scaleSequential(d3.interpolateBlues)
+                .domain([0, d3.max(numbers)]);
+            
+            // Fit the projection to the GeoJSON data
+            projection.fitSize([width, height], data);
+
+            // Draw the map
+            mapGroup.selectAll("path")
+                .data(data.features)
+                .enter()
+                .append("path")
+                .attr("d", path)
+                .attr("fill", d => 
+                    d.properties.numbers === undefined || d.properties.numbers === null
+                        ? "#ffcccc" // Use a distinct color (e.g., light red) for "N/A"
+                        : colorScale(d.properties.numbers || 0) // Use color scale for valid numbers
+                )
+                .attr("stroke", "#333")
+                .attr("stroke-width", 0.5)
+                .on("mouseover", function(event, d) {
+                    d3.select(this).classed("hovered", true); // Add hover effect
+                    tooltip.style("opacity", 1)
+                        .html(`
+                            <strong>Area:</strong> ${d.properties.area_name || 'Unknown'}<br>
+                            <strong>Value:</strong> ${d.properties.numbers !== undefined && d.properties.numbers !== null ? d.properties.numbers : 'N/A'}
+                        `)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 20) + "px");
+                })
+                .on("mousemove", function(event) {
+                    tooltip.style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 20) + "px");
+                })
+                .on("mouseout", function() {
+                    d3.select(this).classed("hovered", false); // Remove hover effect
+                    tooltip.style("opacity", 0);
+                });
+        }).catch(function(error) {
+            console.error("Error loading GeoJSON data:", error);
+        });
+
+    </script>
 </body>
 </html>

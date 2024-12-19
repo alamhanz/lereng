@@ -26,13 +26,11 @@ class chrmap:
 
         # Merge SHP and DataFrame on shp_file_name
         geojson = self.shp_indo[level].merge(
-            data[[level_name, "numbers"]], on=level_name
+            data[[level_name, "numbers"]], on=level_name, how="left"
         )
 
         # geojson = geojson.dropna()
         geojson["area_name"] = geojson[level_name]
-        print(geojson)
-
         geojson.to_file(os.path.join(path, "map_with_data.geojson"), driver="GeoJSON")
         print(f"save in {os.path.join(path, 'map_with_data.geojson')}")
 
