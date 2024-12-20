@@ -21,14 +21,26 @@
         .hovered {
             filter: brightness(0.8); /* Darken on hover */
         }
+        #legend-container {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            gap: 8px;
+            margin-top: 10px; /* Space between map and legend */
+        }
     </style>
 </head>
 <body>
-    <svg id="map" width="800" height="600"></svg>
+    <!-- Map container -->
+    <svg id="map" width="800" height="400"></svg>
+
+    <!-- Legend container -->
+    <div id="legend-container"></div>
+
     <script>
         // Set up SVG dimensions
         const width = 800;
-        const height = 600;
+        const height = 400;
 
         // Create SVG container
         const svg = d3.select("#map")
@@ -39,7 +51,8 @@
         const mapGroup = svg.append("g");
 
         // Define a color scale
-        const colorScale = d3.scaleSequential(d3.interpolateBlues)
+        const colorScale = d3.scaleSequential()
+            .interpolator(d3.interpolateRgbBasis(["red", "white", "blue"]))
             .domain([0, 100]); // Adjust the domain based on your data range
 
         // Create a projection and path generator
@@ -63,14 +76,34 @@
 
         svg.call(zoom);
 
-        // Define a color scale dynamically based on the data
         // Load and render GeoJSON data
         d3.json("map_with_data.geojson").then(function(data) {
             // Extract all numbers and dynamically set the color scale domain
             const numbers = data.features.map(d => d.properties.numbers || 0);
-            const colorScale = d3.scaleSequential(d3.interpolateBlues)
-                .domain([0, d3.max(numbers)]);
-            
+            const minValue = d3.min(numbers);
+            const maxValue = d3.max(numbers);
+
+            const colorScale = d3.scaleSequential()
+                .interpolator(d3.interpolateRgbBasis(["red", "white", "blue"]))
+                .domain([minValue, maxValue]);
+
+            // Add the legend to the container below the map
+            const legendContainer = d3.select("#legend-container");
+
+            // Add lowest number
+            legendContainer.append("div")
+                .text(minValue);
+
+            // Add legend scale
+            legendContainer.append("div")
+                .style("height", "10px")
+                .style("width", "100px") // Shortened to half width
+                .style("background", "linear-gradient(to right, red, white, blue)");
+
+            // Add highest number
+            legendContainer.append("div")
+                .text(maxValue);
+
             // Fit the projection to the GeoJSON data
             projection.fitSize([width, height], data);
 
@@ -82,7 +115,7 @@
                 .attr("d", path)
                 .attr("fill", d => 
                     d.properties.numbers === undefined || d.properties.numbers === null
-                        ? "#ffcccc" // Use a distinct color (e.g., light red) for "N/A"
+                        ? "yellow" // Bright yellow for N/A
                         : colorScale(d.properties.numbers || 0) // Use color scale for valid numbers
                 )
                 .attr("stroke", "#333")
@@ -108,7 +141,6 @@
         }).catch(function(error) {
             console.error("Error loading GeoJSON data:", error);
         });
-
     </script>
 </body>
 </html>

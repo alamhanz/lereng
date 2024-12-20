@@ -60,15 +60,15 @@ all_levels_name = ["provinsi", "kabupaten_kota", "kecamatan"]
 
 param = dict(
     Provinsi=dict(
-        tolerance=0.0093,
+        tolerance=0.008,
         preserve_topology=False,
     ),
     Kab_Kota=dict(
-        tolerance=0.002,
+        tolerance=0.001,
         preserve_topology=True,
     ),
     Kecamatan=dict(
-        tolerance=0.0007,
+        tolerance=0.0006,
         preserve_topology=True,
     ),
 )
@@ -76,10 +76,13 @@ param = dict(
 
 all_name = dict(zip(all_levels, all_levels_name))
 for lvl in all_levels:
+    print(lvl)
     geodf = gpd.read_file(os.path.join("maps", "shp", lvl, f"{lvl}.shp"))
     param_level = param[lvl]
     geodf["geometry"] = geodf["geometry"].simplify(**param_level)
     geodf["geometry"] = geodf["geometry"].apply(reduce_precision)
+
+    print(geodf.sample(5))
 
     # Save to GeoJSON
     geodf.to_file(

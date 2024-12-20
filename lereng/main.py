@@ -25,6 +25,7 @@ class chrmap:
         level_name = "kab_kota" if level == "kabupaten_kota" else level
 
         # Merge SHP and DataFrame on shp_file_name
+        print(level)
         geojson = self.shp_indo[level].merge(
             data[[level_name, "numbers"]], on=level_name, how="left"
         )
@@ -33,6 +34,7 @@ class chrmap:
         geojson["area_name"] = geojson[level_name]
         geojson.to_file(os.path.join(path, "map_with_data.geojson"), driver="GeoJSON")
         print(f"save in {os.path.join(path, 'map_with_data.geojson')}")
+        print(geojson)
 
         # Copy template as well
         for i in ["html", "js"]:
