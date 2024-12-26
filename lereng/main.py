@@ -32,9 +32,20 @@ class chrmap:
 
         # geojson = geojson.dropna()
         geojson["area_name"] = geojson[level_name]
+        if level != "provinsi":
+            geojson["null_numbers"] = geojson["numbers"].isnull()
+            df_null = geojson.groupby("kode_prov").agg(
+                count_n=("null_numbers", "sum"),
+                count_all=("null_numbers", "count"),
+            )
+            df_null["pct_n"] = df_null["count_n"] / df_null["count_all"]
+            used_kode_prov = df_null[df_null["pct_n"] <= 0.005].index.tolist()
+
+            geojson = geojson[geojson.kode_prov.isin(used_kode_prov)]
+
         geojson.to_file(os.path.join(path, "map_with_data.geojson"), driver="GeoJSON")
-        print(f"save in {os.path.join(path, 'map_with_data.geojson')}")
-        print(geojson)
+        # print(f"save in {os.path.join(path, 'map_with_data.geojson')}")
+        # print(geojson)
 
         # Copy template as well
         for i in ["html", "js"]:

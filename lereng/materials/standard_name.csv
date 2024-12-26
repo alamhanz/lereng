@@ -342,7 +342,6 @@
 340,11.02.15,11.02,11,Tanoh Alas,Aceh Tenggara,Aceh,11.02.15
 341,11.02.12,11.02,11,Ketambe,Aceh Tenggara,Aceh,11.02.12
 342,11.02.13,11.02,11,Deleng Pokhkisen,Aceh Tenggara,Aceh,11.02.13
-343,82.--.--,82.--,82,,,Maluku Utara,82.--.--
 344,11.02.16,11.02,11,Leuser,Aceh Tenggara,Aceh,11.02.16
 345,76.02.15,76.02,76,Bonehau,Mamuju,Sulawesi Barat,76.02.15
 346,91.05.10,91.05,91,Kepulauan Ambai,Kepulauan Yapen,Papua,91.05.10
@@ -683,7 +682,7 @@
 681,13.03.09,13.03,13,Sumpur Kudus,Sijunjung,Sumatera Barat,13.03.09
 682,12.12.07,12.12,12,Porsea,Toba,Sumatera Utara,12.12.07
 683,12.12.08,12.12,12,Ajibata,Toba,Sumatera Utara,12.12.08
-684,91.15.--,91.15,91,Walani,Waropen,Papua,91.15.--
+684,91.15.99,91.15,91,Walani,Waropen,Papua,91.15.99
 685,12.12.10,12.12,12,Uluan,Toba,Sumatera Utara,12.12.10
 686,63.72.03,63.72,63,Cempaka,Kota Banjarbaru,Kalimantan Selatan,63.72.03
 687,13.03.10,13.03,13,Kupitan,Sijunjung,Sumatera Barat,13.03.10
@@ -913,7 +912,7 @@
 911,91.25.02,91.25,91,Wangbe,Puncak,Papua Tengah,91.25.02
 912,91.25.03,91.25,91,Beoga,Puncak,Papua Tengah,91.25.03
 913,91.25.08,91.25,91,Gome,Puncak,Papua Tengah,91.25.08
-914,61.02.--,61.02,61,,Mempawah,Kalimantan Barat,61.02.--
+914,61.02.99,61.02,61,Unknown,Mempawah,Kalimantan Barat,61.02.99
 915,91.25.09,91.25,91,Dervos,Puncak,Papua Tengah,91.25.09
 916,73.71.03,73.71,73,Makassar,Kota Makassar,Sulawesi Selatan,73.71.03
 917,91.25.06,91.25,91,Sinak,Puncak,Papua Tengah,91.25.06
@@ -3607,7 +3606,7 @@
 3605,74.11.10,74.11,74,Aere,Kolaka Timur,Sulawesi Tenggara,74.11.10
 3606,13.73.03,13.73,13,Silungkang,Kota Sawahlunto,Sumatera Barat,13.73.03
 3607,13.73.04,13.73,13,Talawi,Kota Sawahlunto,Sumatera Barat,13.73.04
-3608,35.04.--,35.04,35,,Tulungagung,Jawa Timur,35.04.--
+3608,35.04.99,35.04,35,Unknown,Tulungagung,Jawa Timur,35.04.99
 3609,13.73.01,13.73,13,Lembah Segar,Kota Sawahlunto,Sumatera Barat,13.73.01
 3610,13.73.02,13.73,13,Barangin,Kota Sawahlunto,Sumatera Barat,13.73.02
 3611,33.04.05,33.04,33,Bawang,Banjarnegara,Jawa Tengah,33.04.05
@@ -3884,7 +3883,6 @@
 3882,81.02.03,81.02,81,Kei Besar,Maluku Tenggara,Maluku,81.02.03
 3883,35.04.05,35.04,35,Kauman,Tulungagung,Jawa Timur,35.04.05
 3884,32.01.24,32.01,32,Ciawi,Bogor,Jawa Barat,32.01.24
-3885,64.--.--,64.--,64,,,Kalimantan Timur,64.--.--
 3886,35.04.06,35.04,35,Pagerwojo,Tulungagung,Jawa Timur,35.04.06
 3887,32.01.29,32.01,32,Ciomas,Bogor,Jawa Barat,32.01.29
 3888,81.02.01,81.02,81,Kei Kecil,Maluku Tenggara,Maluku,81.02.01
@@ -5539,7 +5537,6 @@
 5537,91.12.31,91.12,91,Teiraplu,Pegunungan Bintang,Papua Pegunungan,91.12.31
 5538,91.12.32,91.12,91,Eipumek,Pegunungan Bintang,Papua Pegunungan,91.12.32
 5539,91.12.30,91.12,91,Jetfa,Pegunungan Bintang,Papua Pegunungan,91.12.30
-5540,13.--.--,13.--,13,,,Sumatera Barat,13.--.--
 5541,35.24.09,35.24,35,Sekaran,Lamongan,Jawa Timur,35.24.09
 5542,35.24.07,35.24,35,Brondong,Lamongan,Jawa Timur,35.24.07
 5543,35.24.08,35.24,35,Laren,Lamongan,Jawa Timur,35.24.08
@@ -6711,7 +6708,6 @@
 6709,11.01.15,11.01,11,Bakongan Timur,Aceh Selatan,Aceh,11.01.15
 6710,11.01.16,11.01,11,Trumon Timur,Aceh Selatan,Aceh,11.01.16
 6711,11.01.10,11.01,11,Pasi Raja,Aceh Selatan,Aceh,11.01.10
-6712,35.--.--,35.--,35,,,Jawa Timur,35.--.--
 6713,65.01.09,65.01,65,Sekatak,Bulungan,Kalimantan Utara,65.01.09
 6714,53.02.30,53.02,53,Mollo Tengah,Timor Tengah Selatan,Nusa Tenggara Timur,53.02.30
 6715,53.02.31,53.02,53,Tobu,Timor Tengah Selatan,Nusa Tenggara Timur,53.02.31
@@ -7020,7 +7016,6 @@
 7018,33.28.15,33.28,33,Kramat,Tegal,Jawa Tengah,33.28.15
 7019,33.28.12,33.28,33,Talang,Tegal,Jawa Tengah,33.28.12
 7020,33.28.13,33.28,33,Dukuhturi,Tegal,Jawa Tengah,33.28.13
-7021,12.--.--,12.--,12,,,Sumatera Utara,12.--.--
 7022,92.05.01,92.05,92,Misool (Misool Utara),Raja Ampat,Papua Barat Daya,92.05.01
 7023,92.05.02,92.05,92,Waigeo Utara,Raja Ampat,Papua Barat Daya,92.05.02
 7024,91.06.21,91.06,91,Bondifuar,Biak Numfor,Papua,91.06.21
@@ -7197,7 +7192,6 @@
 7195,91.06.02,91.06,91,Biak Utara,Biak Numfor,Papua,91.06.02
 7196,14.05.05,14.05,14,Langgam,Pelalawan,Riau,14.05.05
 7197,14.05.06,14.05,14,Pelalawan,Pelalawan,Riau,14.05.06
-7198,73.--.--,73.--,73,,,Sulawesi Selatan,73.--.--
 7199,33.18.08,33.18,33,Juwana,Pati,Jawa Tengah,33.18.08
 7200,33.18.09,33.18,33,Jakenan,Pati,Jawa Tengah,33.18.09
 7201,33.18.06,33.18,33,Jaken,Pati,Jawa Tengah,33.18.06

@@ -85,15 +85,15 @@ all_levels_name = ["provinsi", "kabupaten_kota", "kecamatan"]
 
 param = dict(
     Provinsi=dict(
-        tolerance=0.005,
+        tolerance=0.0045,
         preserve_topology=False,
     ),
     Kab_Kota=dict(
-        tolerance=0.005,
+        tolerance=0.0025,
         preserve_topology=True,
     ),
     Kecamatan=dict(
-        tolerance=0.005,
+        tolerance=0.001,
         preserve_topology=True,
     ),
 )
@@ -144,6 +144,7 @@ for lvl in all_levels:
     # )
 
     del geodf["original_geometry"]
+    del geodf["is_closed"]
     # Save to GeoJSON
     geodf.to_file(
         f"lereng/materials/indonesia_maps/{all_name[lvl]}-light.geojson",
