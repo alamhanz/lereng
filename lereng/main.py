@@ -11,28 +11,34 @@ PATH_SAMPLE = os.path.join(PATH_ABS, "sample")
 
 
 class chrmap:
-    def __init__(self):
+
+    def __init__(self, level="provinsi"):
         # Load SHP file
+        self.level = level
         self.shp_indo = {}
         for m in os.listdir(PATH_MAPS):
-            dtemp = gpd.read_file(os.path.join(PATH_MAPS, m))
-            dtemp.columns = [c.lower() for c in dtemp.columns]
-            self.shp_indo[m.split("-")[0].lower()] = dtemp
+            lvl = m.split("-")[0].lower()
+            if level == lvl:
+                dtemp = gpd.read_file(os.path.join(PATH_MAPS, m))
+                dtemp.columns = [c.lower() for c in dtemp.columns]
+                self.shp_indo[lvl] = dtemp
 
-    def insert(self, data, level="provinsi", metric=None, path="temp_viz"):
+        if len(self.shp_indo) == 0:
+            raise ValueError("level options: `provinsi, kecamatan, kabupaten_kota`")
+
+    def insert(self, data, metric, path="temp_viz"):
         data.columns = [c.lower() for c in data.columns]
         data["numbers"] = data[metric]
-        level_name = "kab_kota" if level == "kabupaten_kota" else level
+        level_name = "kab_kota" if self.level == "kabupaten_kota" else self.level
 
         # Merge SHP and DataFrame on shp_file_name
-        print(level)
-        geojson = self.shp_indo[level].merge(
+        geojson = self.shp_indo[self.level].merge(
             data[[level_name, "numbers"]], on=level_name, how="left"
         )
 
-        # geojson = geojson.dropna()
+        # Show only province that matter
         geojson["area_name"] = geojson[level_name]
-        if level != "provinsi":
+        if self.level != "provinsi":
             geojson["null_numbers"] = geojson["numbers"].isnull()
             df_null = geojson.groupby("kode_prov").agg(
                 count_n=("null_numbers", "sum"),
@@ -44,8 +50,6 @@ class chrmap:
             geojson = geojson[geojson.kode_prov.isin(used_kode_prov)]
 
         geojson.to_file(os.path.join(path, "map_with_data.geojson"), driver="GeoJSON")
-        # print(f"save in {os.path.join(path, 'map_with_data.geojson')}")
-        # print(geojson)
 
         # Copy template as well
         for i in ["html", "js"]:
