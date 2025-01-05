@@ -1,8 +1,10 @@
+import json
 import os
 import shutil
 
 import geopandas as gpd
 import pandas as pd
+from jinja2 import Environment, FileSystemLoader
 
 PATH_ABS = os.path.dirname(os.path.abspath(__file__))
 PATH_MATERIALS = os.path.join(PATH_ABS, "materials")
@@ -27,6 +29,11 @@ class chrmap:
             raise ValueError("level options: `provinsi, kecamatan, kabupaten_kota`")
 
     def insert(self, data, metric, path="temp_viz"):
+        ## put the data into js
+        env = Environment(loader=FileSystemLoader(PATH_MATERIALS))
+        template_js = env.get_template("lereng_viz.js")
+        template_html = env.get_template("lereng_viz.html")
+
         data.columns = [c.lower() for c in data.columns]
         data["numbers"] = data[metric]
         level_name = "kab_kota" if self.level == "kabupaten_kota" else self.level
@@ -49,7 +56,8 @@ class chrmap:
 
             geojson = geojson[geojson.kode_prov.isin(used_kode_prov)]
 
-        geojson.to_file(os.path.join(path, "map_with_data.geojson"), driver="GeoJSON")
+        geojson_file = os.path.join(path, "map_with_data.geojson")
+        geojson.to_file(geojson_file, driver="GeoJSON")
 
         # Copy template as well
         for i in ["html", "js"]:
@@ -57,6 +65,21 @@ class chrmap:
                 os.path.join(PATH_MATERIALS, f"lereng_viz.{i}"),
                 os.path.join(path, f"lereng_viz.{i}"),
             )
+
+        with open(geojson_file, "r") as f:
+            geojson_data = json.load(f)
+
+        rendered_js = template_js.render(geojson_data=json.dumps(geojson_data))
+        # output_js = os.path.join(path, "lereng_viz.js")
+        # with open(output_js, "w") as f:
+        #     f.write(rendered_js)
+
+        # with open(output_js, "r") as f:
+        #     geojson_data = json.load(f)
+        rendered_html = template_html.render(js_content=rendered_js)
+        output_html = os.path.join(path, "lereng_viz.html")
+        with open(output_html, "w") as f:
+            f.write(rendered_html)
 
 
 def datasample(name):
