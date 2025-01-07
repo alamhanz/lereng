@@ -19,24 +19,6 @@ def datasample(name):
     return pd.read_csv(os.path.join(PATH_SAMPLE, name))
 
 
-# def get_embedding(texts):
-#     MODEL_ID = "akahana/roberta-base-indonesia"
-#     hf_token = os.getenv("hf_token")
-#     api_url = (
-#         f"https://api-inference.huggingface.co/pipeline/feature-extraction/{MODEL_ID}"
-#     )
-#     headers = {"Authorization": f"Bearer {hf_token}"}
-#     response = requests.post(
-#         api_url,
-#         headers=headers,
-#         json={"inputs": texts, "options": {"wait_for_model": True}},
-#     )
-
-#     hf_response = response.json()
-#     v_temp = np.array(hf_response[0][0]).tolist()
-#     return v_temp
-
-
 def get_embedding(texts):
     # MODEL_ID = "akahana/roberta-base-indonesia"
     MODEL_ID = "facebook/fasttext-id-vectors"
