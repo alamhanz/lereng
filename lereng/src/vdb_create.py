@@ -36,7 +36,8 @@ def create_nested_dicts(csv_path):
 
 
 def get_embedding(texts):
-    MODEL_ID = "akahana/roberta-base-indonesia"
+    # MODEL_ID = "akahana/roberta-base-indonesia"
+    MODEL_ID = "facebook/fasttext-id-vectors"
     hf_token = os.getenv("hf_token")
     api_url = (
         f"https://api-inference.huggingface.co/pipeline/feature-extraction/{MODEL_ID}"
@@ -49,8 +50,8 @@ def get_embedding(texts):
     )
 
     hf_response = response.json()
-    v_temp = np.array(hf_response[0][0]).tolist()
-    return v_temp
+    print(hf_response)
+    return hf_response
 
 
 # Get The Standard Name
@@ -81,9 +82,13 @@ if n_areas >= JSON_LIMIT:
 
         vv = [get_embedding(i) for i in area_text]
         metadatas = [{"level": level} for i in area_text]
-        print(np.array(vv).shape)
+        try:
+            print(np.array(vv).shape)
 
-        # Add to collections
-        collection.upsert(
-            documents=area_text, embeddings=vv, metadatas=metadatas, ids=area_ids
-        )
+            # Add to collections
+            collection.upsert(
+                documents=area_text, embeddings=vv, metadatas=metadatas, ids=area_ids
+            )
+        except:
+            print("fail")
+            print([len(i) for i in vv])

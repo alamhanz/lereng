@@ -19,8 +19,27 @@ def datasample(name):
     return pd.read_csv(os.path.join(PATH_SAMPLE, name))
 
 
+# def get_embedding(texts):
+#     MODEL_ID = "akahana/roberta-base-indonesia"
+#     hf_token = os.getenv("hf_token")
+#     api_url = (
+#         f"https://api-inference.huggingface.co/pipeline/feature-extraction/{MODEL_ID}"
+#     )
+#     headers = {"Authorization": f"Bearer {hf_token}"}
+#     response = requests.post(
+#         api_url,
+#         headers=headers,
+#         json={"inputs": texts, "options": {"wait_for_model": True}},
+#     )
+
+#     hf_response = response.json()
+#     v_temp = np.array(hf_response[0][0]).tolist()
+#     return v_temp
+
+
 def get_embedding(texts):
-    MODEL_ID = "akahana/roberta-base-indonesia"
+    # MODEL_ID = "akahana/roberta-base-indonesia"
+    MODEL_ID = "facebook/fasttext-id-vectors"
     hf_token = os.getenv("hf_token")
     api_url = (
         f"https://api-inference.huggingface.co/pipeline/feature-extraction/{MODEL_ID}"
@@ -33,8 +52,7 @@ def get_embedding(texts):
     )
 
     hf_response = response.json()
-    v_temp = np.array(hf_response[0][0]).tolist()
-    return v_temp
+    return hf_response
 
 
 class chrmap:
@@ -125,13 +143,23 @@ class areaname:
         ## Identify Area
         area_type = self.identify_area(df, area_col).upper()
 
+        ## Start AreaDB
+        db_level = dict(zip(self.area_types, ["PROV", "KOTA", "KEC"]))
+        area_db = areadb(level=db_level[area_type])
+
         ## Split Area
         known_area = self.current_areas & self.all_name[area_type]
         unknown_area = self.current_areas - self.all_name[area_type]
 
-        known_area_dict = dict(zip(known_area, known_area))
+        all_area_dict = dict(zip(known_area, known_area))
+        unknown_area_dict = {}
+        for i in unknown_area:
+            candidate_norm = area_db.get_normalize(i, n_results=3)[0]
+            unknown_area_dict[i] = candidate_norm
 
-        return unknown_area
+        all_area_dict.update(unknown_area_dict)
+        df["normalize_area"] = df[area_col].apply(lambda x: all_area_dict[x])
+        return df
 
 
 class areadb:
@@ -147,12 +175,13 @@ class areadb:
         )
         self.level = level
 
-    def get_normalize(self, area):
+    def get_normalize(self, area, n_results=5):
         query_vector = get_embedding(area)
         results = self.collection.query(
             query_embeddings=query_vector,
-            n_results=15,
+            n_results=n_results,
             where={"level": self.level},
         )
         # results = self.collection.get(ids=["PR34"], include=["embeddings", "documents"])
+        results = results["documents"][0]
         return results
