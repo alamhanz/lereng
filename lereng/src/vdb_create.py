@@ -35,7 +35,13 @@ def create_nested_dicts(csv_path):
     return result
 
 
-def query(texts):
+def get_embedding(texts):
+    MODEL_ID = "akahana/roberta-base-indonesia"
+    hf_token = os.getenv("hf_token")
+    api_url = (
+        f"https://api-inference.huggingface.co/pipeline/feature-extraction/{MODEL_ID}"
+    )
+    headers = {"Authorization": f"Bearer {hf_token}"}
     response = requests.post(
         api_url,
         headers=headers,
@@ -43,12 +49,8 @@ def query(texts):
     )
 
     hf_response = response.json()
-    output = []
-    for v in hf_response:
-        v_temp = np.array(v[0])
-        v_temp = v_temp.mean(axis=0)
-        output.append(v_temp.tolist())
-    return output
+    v_temp = np.array(hf_response[0][0]).tolist()
+    return v_temp
 
 
 # Get The Standard Name
@@ -58,21 +60,15 @@ def query(texts):
 areas_name = joblib.load(os.path.join(DATA_PATH, "standard_name.pkl"))
 
 # Initialize Chroma client
-client = chromadb.PersistentClient(path=CHROMA_PATH, settings=Settings())
+client = chromadb.PersistentClient(path=CHROMA_PATH)
 collection = client.get_or_create_collection(
     "indo_areas", metadata={"hnsw:space": "cosine"}
 )
 
-# Initialize HF API
-hf_token = os.getenv("hf_token")
-MODEL_ID = "akahana/roberta-base-indonesia"
-api_url = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{MODEL_ID}"
-headers = {"Authorization": f"Bearer {hf_token}"}
-
 # Creation
-level = "KEC"  # PROV, KOTA, KEC
+level = "KOTA"  # PROV, KOTA, KEC
 n_areas = len(areas_name[level])
-JSON_LIMIT = 20
+JSON_LIMIT = 30
 
 if n_areas >= JSON_LIMIT:
     k = math.ceil(n_areas / JSON_LIMIT)
@@ -83,7 +79,7 @@ if n_areas >= JSON_LIMIT:
         ]
         area_ids = list(areas_name[level].keys())[i * JSON_LIMIT : (i + 1) * JSON_LIMIT]
 
-        vv = query(area_text)
+        vv = [get_embedding(i) for i in area_text]
         metadatas = [{"level": level} for i in area_text]
         print(np.array(vv).shape)
 

@@ -2,14 +2,39 @@ import json
 import os
 import shutil
 
+import chromadb
 import geopandas as gpd
+import numpy as np
 import pandas as pd
+import requests
 from jinja2 import Environment, FileSystemLoader
 
 PATH_ABS = os.path.dirname(os.path.abspath(__file__))
 PATH_MATERIALS = os.path.join(PATH_ABS, "materials")
 PATH_MAPS = os.path.join(PATH_ABS, "materials", "indonesia_maps")
 PATH_SAMPLE = os.path.join(PATH_ABS, "sample")
+
+
+def datasample(name):
+    return pd.read_csv(os.path.join(PATH_SAMPLE, name))
+
+
+def get_embedding(texts):
+    MODEL_ID = "akahana/roberta-base-indonesia"
+    hf_token = os.getenv("hf_token")
+    api_url = (
+        f"https://api-inference.huggingface.co/pipeline/feature-extraction/{MODEL_ID}"
+    )
+    headers = {"Authorization": f"Bearer {hf_token}"}
+    response = requests.post(
+        api_url,
+        headers=headers,
+        json={"inputs": texts, "options": {"wait_for_model": True}},
+    )
+
+    hf_response = response.json()
+    v_temp = np.array(hf_response[0][0]).tolist()
+    return v_temp
 
 
 class chrmap:
@@ -26,25 +51,24 @@ class chrmap:
                 self.shp_indo[lvl] = dtemp
 
         if len(self.shp_indo) == 0:
-            raise ValueError("level options: `provinsi, kecamatan, kabupaten_kota`")
+            raise ValueError("level options: `provinsi, kecamatan, kab_kota`")
 
-    def insert(self, data, metric, path="temp_viz"):
+    def insert(self, data, metric_col, area_col, path="temp_viz"):
         ## put the data into js
         env = Environment(loader=FileSystemLoader(PATH_MATERIALS))
         template_js = env.get_template("lereng_viz.js")
         template_html = env.get_template("lereng_viz.html")
 
-        data.columns = [c.lower() for c in data.columns]
-        data["numbers"] = data[metric]
-        level_name = "kab_kota" if self.level == "kabupaten_kota" else self.level
+        data["numbers"] = data[metric_col]
+        data[self.level] = data[area_col]
 
         # Merge SHP and DataFrame on shp_file_name
         geojson = self.shp_indo[self.level].merge(
-            data[[level_name, "numbers"]], on=level_name, how="left"
+            data[[self.level, "numbers"]], on=self.level, how="left"
         )
 
         # Show only province that matter
-        geojson["area_name"] = geojson[level_name]
+        geojson["area_name"] = geojson[self.level]
         if self.level != "provinsi":
             geojson["null_numbers"] = geojson["numbers"].isnull()
             df_null = geojson.groupby("kode_prov").agg(
@@ -70,17 +94,65 @@ class chrmap:
             geojson_data = json.load(f)
 
         rendered_js = template_js.render(geojson_data=json.dumps(geojson_data))
-        # output_js = os.path.join(path, "lereng_viz.js")
-        # with open(output_js, "w") as f:
-        #     f.write(rendered_js)
-
-        # with open(output_js, "r") as f:
-        #     geojson_data = json.load(f)
         rendered_html = template_html.render(js_content=rendered_js)
         output_html = os.path.join(path, "lereng_viz.html")
         with open(output_html, "w") as f:
             f.write(rendered_html)
 
 
-def datasample(name):
-    return pd.read_csv(os.path.join(PATH_SAMPLE, name))
+class areaname:
+    def __init__(self):
+        self.standard = pd.read_csv(os.path.join(PATH_MATERIALS, "standard_name.csv"))
+        self.area_types = ["PROVINSI", "KECAMATAN", "KAB_KOTA"]
+        self.all_name = {}
+        for i in self.area_types:
+            self.all_name[i] = set(self.standard[i].unique())
+        self.current_areas = set()
+
+    def identify_area(self, df, area_col):
+        self.current_areas = set(df[area_col].unique())
+        identity = None
+        n_intersect = 1
+        for i in self.area_types:
+            intersect = self.current_areas & self.all_name[i]
+            if n_intersect < len(intersect):
+                n_intersect = len(intersect)
+                identity = i
+
+        return identity.lower()
+
+    def normalize(self, df, area_col):
+        ## Identify Area
+        area_type = self.identify_area(df, area_col).upper()
+
+        ## Split Area
+        known_area = self.current_areas & self.all_name[area_type]
+        unknown_area = self.current_areas - self.all_name[area_type]
+
+        known_area_dict = dict(zip(known_area, known_area))
+
+        return unknown_area
+
+
+class areadb:
+    def __init__(self, level):
+        # Level = PROV, KOTA, KEC
+        # Initialize HF API
+        CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
+        DATA_PATH = os.path.join(CURRENT_PATH, "materials")
+        CHROMA_PATH = os.path.join(DATA_PATH, "vdb")
+        self.client = chromadb.PersistentClient(path=CHROMA_PATH)
+        self.collection = self.client.get_or_create_collection(
+            "indo_areas", metadata={"hnsw:space": "cosine"}
+        )
+        self.level = level
+
+    def get_normalize(self, area):
+        query_vector = get_embedding(area)
+        results = self.collection.query(
+            query_embeddings=query_vector,
+            n_results=15,
+            where={"level": self.level},
+        )
+        # results = self.collection.get(ids=["PR34"], include=["embeddings", "documents"])
+        return results
