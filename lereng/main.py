@@ -61,11 +61,11 @@ class chrmap:
 
         data["numbers"] = data[metric_col]
         data[self.level] = data[area_col]
+        df_metric = data[[self.level, "numbers"]]
+        df_metric = df_metric.groupby(self.level)[["numbers"]].sum().reset_index()
 
         # Merge SHP and DataFrame on shp_file_name
-        geojson = self.shp_indo[self.level].merge(
-            data[[self.level, "numbers"]], on=self.level, how="left"
-        )
+        geojson = self.shp_indo[self.level].merge(df_metric, on=self.level, how="left")
 
         # Show only province that matter
         geojson["area_name"] = geojson[self.level]
