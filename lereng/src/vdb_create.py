@@ -50,7 +50,6 @@ def get_embedding(texts):
     )
 
     hf_response = response.json()
-    print(hf_response)
     return hf_response
 
 
@@ -67,7 +66,7 @@ collection = client.get_or_create_collection(
 )
 
 # Creation
-level = "KOTA"  # PROV, KOTA, KEC
+level = "KEC"  # PROV, KOTA, KEC
 n_areas = len(areas_name[level])
 JSON_LIMIT = 30
 
