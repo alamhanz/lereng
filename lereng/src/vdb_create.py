@@ -72,7 +72,7 @@ JSON_LIMIT = 30
 
 if n_areas >= JSON_LIMIT:
     k = math.ceil(n_areas / JSON_LIMIT)
-    for i in range(80, k):
+    for i in range(111, k):
         print(i)
         area_text = list(areas_name[level].values())[
             i * JSON_LIMIT : (i + 1) * JSON_LIMIT

@@ -27,12 +27,14 @@ def get_embedding(texts):
         f"https://api-inference.huggingface.co/pipeline/feature-extraction/{MODEL_ID}"
     )
     headers = {"Authorization": f"Bearer {hf_token}"}
+    print("REQUESTING")
     response = requests.post(
         api_url,
         headers=headers,
         json={"inputs": texts, "options": {"wait_for_model": True}},
     )
 
+    print("RESPONSE")
     hf_response = response.json()
     return hf_response
 
