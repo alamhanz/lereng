@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lereng"
-version = "0.0.4"
+version = "0.0.5"
 description = "Mapping Your Indonesia Data to Map. Without LatLong."
 authors = [
     {name = "Alamsyah Hanza", email = "alamhanz@gmail.com"}
