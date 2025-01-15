@@ -27,15 +27,15 @@ def get_embedding(texts):
         f"https://api-inference.huggingface.co/pipeline/feature-extraction/{MODEL_ID}"
     )
     headers = {"Authorization": f"Bearer {hf_token}"}
-    print("REQUESTING")
     response = requests.post(
         api_url,
         headers=headers,
         json={"inputs": texts, "options": {"wait_for_model": True}},
     )
-
-    print("RESPONSE")
     hf_response = response.json()
+    if "error" in hf_response:
+        hf_response = []
+
     return hf_response
 
 
@@ -138,11 +138,15 @@ class areaname:
         all_area_dict = dict(zip(known_area, known_area))
         unknown_area_dict = {}
         for i in unknown_area:
-            candidate_norm = area_db.get_normalize(i, n_results=3)[0]
-            unknown_area_dict[i] = candidate_norm
+            candidate_norm = area_db.get_normalize(i, n_results=3)
+            if len(candidate_norm) == 0:
+                unknown_area_dict[i] = i
+            else:
+                unknown_area_dict[i] = candidate_norm[0]
 
         all_area_dict.update(unknown_area_dict)
-        df["normalize_area"] = df[area_col].apply(lambda x: all_area_dict[x])
+        df["normalized_area"] = df[area_col].apply(lambda x: all_area_dict[x])
+        df["is_already_normalized"] = df[area_col].isin(known_area)
         return df
 
 
@@ -161,6 +165,10 @@ class areadb:
 
     def get_normalize(self, area, n_results=5):
         query_vector = get_embedding(area)
+        if len(query_vector) == 0:
+            print("No Response")
+            return []
+
         results = self.collection.query(
             query_embeddings=query_vector,
             n_results=n_results,
