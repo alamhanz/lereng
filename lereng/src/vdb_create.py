@@ -72,7 +72,7 @@ JSON_LIMIT = 30
 
 if n_areas >= JSON_LIMIT:
     k = math.ceil(n_areas / JSON_LIMIT)
-    for i in range(141, k):  # 111 to 141 --> (30 * 30) + 27 = 927 request a day
+    for i in range(173, k):  # 141 to 173 --> (30 * 30) + 27 = 927 request a day
         print(i)
         area_text = list(areas_name[level].values())[
             i * JSON_LIMIT : (i + 1) * JSON_LIMIT
