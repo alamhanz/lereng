@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lereng"
-version = "0.0.5"
+version = "0.0.6"
 description = "Mapping Your Indonesia Data to Map. Without LatLong."
 authors = [
     {name = "Alamsyah Hanza", email = "alamhanz@gmail.com"}
@@ -16,7 +16,8 @@ dependencies = [
     "matplotlib==3.9.1.post1",
     "chromadb==0.5.18",
     "joblib",
-    "jinja2"
+    "jinja2",
+    "shortuuid"
 ]
 license = {text = "MIT"}
 classifiers = [

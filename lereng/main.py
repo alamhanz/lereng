@@ -1,12 +1,14 @@
 import json
 import os
 import shutil
+import time
 
 import chromadb
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import requests
+import shortuuid
 from jinja2 import Environment, FileSystemLoader
 
 PATH_ABS = os.path.dirname(os.path.abspath(__file__))
@@ -27,13 +29,29 @@ def get_embedding(texts):
         f"https://api-inference.huggingface.co/pipeline/feature-extraction/{MODEL_ID}"
     )
     headers = {"Authorization": f"Bearer {hf_token}"}
-    response = requests.post(
-        api_url,
-        headers=headers,
-        json={"inputs": texts, "options": {"wait_for_model": True}},
-    )
-    hf_response = response.json()
+    k = 0
+    while True:
+        try:
+            response = requests.post(
+                api_url,
+                headers=headers,
+                json={"inputs": texts, "options": {"wait_for_model": True}},
+                timeout=0.3,
+            )
+            hf_response = response.json()
+        except requests.exceptions.ReadTimeout:
+            print("Response Timeout. Retry it")
+            hf_response = {"timeout": True}
+
+        if ("timeout" not in hf_response) | (k > 5):
+            break
+        else:
+            print("Wait before another request.")
+            k += 1
+            time.sleep(1)
+
     if "error" in hf_response:
+        print(f"Reached Limit: {hf_response['error']}")
         hf_response = []
 
     return hf_response
@@ -55,7 +73,14 @@ class chrmap:
         if len(self.shp_indo) == 0:
             raise ValueError("level options: `provinsi, kecamatan, kab_kota`")
 
-    def insert(self, data, metric_col, area_col, path="temp_viz"):
+    def insert(self, data, metric_col, area_col, store_path="temp_viz"):
+        # Check Path
+        if not os.path.exists(store_path):
+            os.makedirs(store_path)
+
+        ## initial uuid
+        chr_uuid = shortuuid.ShortUUID().random(length=8)
+
         ## put the data into js
         env = Environment(loader=FileSystemLoader(PATH_MATERIALS))
         template_js = env.get_template("lereng_viz.js")
@@ -82,22 +107,15 @@ class chrmap:
 
             geojson = geojson[geojson.kode_prov.isin(used_kode_prov)]
 
-        geojson_file = os.path.join(path, "map_with_data.geojson")
+        geojson_file = os.path.join(store_path, f"{chr_uuid}-data.geojson")
         geojson.to_file(geojson_file, driver="GeoJSON")
-
-        # Copy template as well
-        for i in ["html", "js"]:
-            shutil.copy(
-                os.path.join(PATH_MATERIALS, f"lereng_viz.{i}"),
-                os.path.join(path, f"lereng_viz.{i}"),
-            )
 
         with open(geojson_file, "r") as f:
             geojson_data = json.load(f)
 
         rendered_js = template_js.render(geojson_data=json.dumps(geojson_data))
         rendered_html = template_html.render(js_content=rendered_js)
-        output_html = os.path.join(path, "lereng_viz.html")
+        output_html = os.path.join(store_path, f"{chr_uuid}-lerengviz.html")
         with open(output_html, "w") as f:
             f.write(rendered_html)
 
