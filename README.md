@@ -2,7 +2,28 @@
 Chrolopleth for Indonesia map.
 
 ## Introduction
-Simple Package to create indonesian map with Value.
+Simple Package to create indonesian map given table contains Area Dimension and One Value.
+
+## How to use it
+
+Prepare the data which contain one area dimension and one value. Then follow the script below:
+```
+df = lereng.datasample("nation_sample_population.csv")
+map_maker = lereng.chrmap(level="provinsi")
+map_maker.insert(df, metric_col="2021", area_col="Prov", store_path="temp_viz") # The result save on "temp_viz" folder in html
+map_maker.render() # render the map for notebook visualization
+```
+
+The data may have not normalized data like "sumut" or "DI Yogya". This package provide normalize function using fast-text model from Hugging Face platform. Please provide `.env` file with the following content `hf_token=xxx`. Then follow the script below:
+```
+area_fun = lereng.areaname()
+df = lereng.datasample("nation_sample_population.csv")
+df_normalized = area_fun.normalize(df, area_col="Prov")
+
+map_maker = lereng.chrmap(level="provinsi")
+map_maker.insert(df_normalized, metric_col="2021", area_col="Prov", store_path="temp_viz") # The result save on "temp_viz" folder in html
+map_maker.render() # render the map for notebook visualization
+```
 
 ## Sources
 
