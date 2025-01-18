@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import requests
 import shortuuid
+from IPython.display import HTML, display
 from jinja2 import Environment, FileSystemLoader
 
 PATH_ABS = os.path.dirname(os.path.abspath(__file__))
@@ -41,7 +42,7 @@ def get_embedding(texts):
             hf_response = response.json()
         except requests.exceptions.ReadTimeout:
             print("Response Timeout. Retry it")
-            hf_response = {"timeout": True}
+            hf_response = {"timeout": True, "error": "Still Timeout"}
 
         if ("timeout" not in hf_response) | (k > 5):
             break
@@ -63,6 +64,7 @@ class chrmap:
         # Load SHP file
         self.level = level
         self.shp_indo = {}
+        self.rendered_html = None
         for m in os.listdir(PATH_MAPS):
             lvl = m.split("-")[0].lower()
             if level == lvl:
@@ -118,6 +120,19 @@ class chrmap:
         output_html = os.path.join(store_path, f"{chr_uuid}-lerengviz.html")
         with open(output_html, "w") as f:
             f.write(rendered_html)
+        self.rendered_html = rendered_html
+
+    def render(self):
+        if self.rendered_html:
+            # This is for Debugging purpose in Notebook - Not related to Oppack-Viz
+            iframe_html = f"""
+            <iframe srcdoc="{self.rendered_html.replace('"', '&quot;')}" width="850" height="450"></iframe>
+            """
+
+            # Display the HTML content
+            display(HTML(iframe_html))
+        else:
+            print("No Map to Render. Do `insert` first.")
 
 
 class areaname:
