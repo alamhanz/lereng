@@ -31,6 +31,7 @@ def get_embedding(texts):
     )
     headers = {"Authorization": f"Bearer {hf_token}"}
     k = 0
+    status = 200
     while True:
         try:
             response = requests.post(
@@ -42,9 +43,10 @@ def get_embedding(texts):
             hf_response = response.json()
         except requests.exceptions.ReadTimeout:
             print("Response Timeout. Retry it")
+            status = 504
             hf_response = {"timeout": True, "error": "Still Timeout"}
 
-        if ("timeout" not in hf_response) | (k > 5):
+        if hf_response.get("timeout", False) | (k > 3):
             break
         else:
             print("Wait before another request.")
@@ -52,10 +54,14 @@ def get_embedding(texts):
             time.sleep(1)
 
     if "error" in hf_response:
-        print(f"Reached Limit: {hf_response['error']}")
+        if status == 504:
+            print("Response Timeout.")
+        else:
+            status = 429
+            print(f"Reached Limit: {hf_response['error']}")
         hf_response = []
 
-    return hf_response
+    return status, hf_response
 
 
 class chrmap:
@@ -143,6 +149,7 @@ class areaname:
         for i in self.area_types:
             self.all_name[i] = set(self.standard[i].unique())
         self.current_areas = set()
+        self.area_db = None
 
     def identify_area(self, df, area_col):
         self.current_areas = set(df[area_col].unique())
@@ -162,7 +169,7 @@ class areaname:
 
         ## Start AreaDB
         db_level = dict(zip(self.area_types, ["PROV", "KOTA", "KEC"]))
-        area_db = areadb(level=db_level[area_type])
+        self.area_db = areadb(level=db_level[area_type])
 
         ## Split Area
         known_area = self.current_areas & self.all_name[area_type]
@@ -171,7 +178,7 @@ class areaname:
         all_area_dict = dict(zip(known_area, known_area))
         unknown_area_dict = {}
         for i in unknown_area:
-            candidate_norm = area_db.get_normalize(i, n_results=3)
+            candidate_norm = self.area_db.get_normalize(i, n_results=3)
             if len(candidate_norm) == 0:
                 unknown_area_dict[i] = i
             else:
@@ -195,9 +202,10 @@ class areadb:
             "indo_areas", metadata={"hnsw:space": "cosine"}
         )
         self.level = level
+        self.api_status = 501
 
     def get_normalize(self, area, n_results=5):
-        query_vector = get_embedding(area)
+        self.api_status, query_vector = get_embedding(area)
         if len(query_vector) == 0:
             print("No Response")
             return []
