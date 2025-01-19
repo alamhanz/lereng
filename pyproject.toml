@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lereng"
-version = "0.0.6"
+version = "0.0.7"
 description = "Mapping Your Indonesia Data to Map. Without LatLong."
 authors = [
     {name = "Alamsyah Hanza", email = "alamhanz@gmail.com"}
@@ -17,7 +17,8 @@ dependencies = [
     "chromadb==0.5.18",
     "joblib",
     "jinja2",
-    "shortuuid"
+    "shortuuid",
+    "ipython"
 ]
 license = {text = "MIT"}
 classifiers = [

@@ -4,3 +4,4 @@ chromadb==0.5.18
 joblib
 jinja2
 shortuuid
+ipython
