@@ -43,10 +43,10 @@ def get_embedding(texts):
             hf_response = response.json()
         except requests.exceptions.ReadTimeout:
             print("Response Timeout. Retry it")
-            status = 504
             hf_response = {"timeout": True, "error": "Still Timeout"}
 
-        if hf_response.get("timeout", False) | (k > 3):
+        if ("timeout" in hf_response) | (k > 3):
+            status = 504
             break
         else:
             print("Wait before another request.")
