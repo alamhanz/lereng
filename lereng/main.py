@@ -45,7 +45,7 @@ def get_embedding(texts):
             print("Response Timeout. Retry it")
             hf_response = {"timeout": True, "error": "Still Timeout"}
 
-        if ("timeout" in hf_response) | (k > 3):
+        if ("timeout" in hf_response) & (k > 3):
             status = 504
             break
         elif isinstance(hf_response, list):
