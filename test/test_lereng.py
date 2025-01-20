@@ -1,8 +1,13 @@
+import sys
+
 from dotenv import load_dotenv
 
+sys.path.append("../lereng")
 import lereng
 
 load_dotenv()
+
+print(lereng.__version__)
 
 map_maker = lereng.chrmap(level="provinsi")
 df = lereng.datasample("nation_sample_population.csv")

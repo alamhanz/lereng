@@ -32,13 +32,13 @@ def get_embedding(texts):
     headers = {"Authorization": f"Bearer {hf_token}"}
     k = 0
     status = 200
-    while True:
+    while k <= 3:
         try:
             response = requests.post(
                 api_url,
                 headers=headers,
                 json={"inputs": texts, "options": {"wait_for_model": True}},
-                timeout=0.3,
+                # timeout=0.75,
             )
             hf_response = response.json()
         except requests.exceptions.ReadTimeout:
@@ -47,6 +47,9 @@ def get_embedding(texts):
 
         if ("timeout" in hf_response) | (k > 3):
             status = 504
+            break
+        elif isinstance(hf_response, list):
+            status = 200
             break
         else:
             print("Wait before another request.")
@@ -178,6 +181,7 @@ class areaname:
         all_area_dict = dict(zip(known_area, known_area))
         unknown_area_dict = {}
         for i in unknown_area:
+            print(f"looking for: {i}")
             candidate_norm = self.area_db.get_normalize(i, n_results=3)
             if len(candidate_norm) == 0:
                 unknown_area_dict[i] = i
