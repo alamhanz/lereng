@@ -84,7 +84,7 @@ class chrmap:
         if len(self.shp_indo) == 0:
             raise ValueError("level options: `provinsi, kecamatan, kab_kota`")
 
-    def insert(self, data, metric_col, area_col, store_path="temp_viz"):
+    def insert(self, data, metric_col, area_col, store_path="temp_viz", tol=0.15):
         # Check Path
         if not os.path.exists(store_path):
             os.makedirs(store_path)
@@ -114,7 +114,7 @@ class chrmap:
                 count_all=("null_numbers", "count"),
             )
             df_null["pct_n"] = df_null["count_n"] / df_null["count_all"]
-            used_kode_prov = df_null[df_null["pct_n"] <= 0.005].index.tolist()
+            used_kode_prov = df_null[df_null["pct_n"] <= tol].index.tolist()
 
             geojson = geojson[geojson.kode_prov.isin(used_kode_prov)]
 
