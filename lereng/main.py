@@ -38,7 +38,7 @@ def get_embedding(texts):
                 api_url,
                 headers=headers,
                 json={"inputs": texts, "options": {"wait_for_model": True}},
-                # timeout=0.75,
+                timeout=0.3,
             )
             hf_response = response.json()
         except requests.exceptions.ReadTimeout:
