@@ -38,7 +38,7 @@ def get_embedding(texts):
                 api_url,
                 headers=headers,
                 json={"inputs": texts, "options": {"wait_for_model": True}},
-                timeout=0.3,
+                timeout=0.5,
             )
             hf_response = response.json()
         except requests.exceptions.ReadTimeout:
@@ -183,6 +183,7 @@ class areaname:
         for i in unknown_area:
             print(f"looking for: {i}")
             candidate_norm = self.area_db.get_normalize(i, n_results=3)
+            print(f"Candidate Results: {candidate_norm}")
             if len(candidate_norm) == 0:
                 unknown_area_dict[i] = i
             else:
