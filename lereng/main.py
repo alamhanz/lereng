@@ -32,7 +32,7 @@ def get_embedding(texts):
     headers = {"Authorization": f"Bearer {hf_token}"}
     k = 0
     status = 200
-    while k <= 3:
+    while True:
         try:
             response = requests.post(
                 api_url,
@@ -42,11 +42,11 @@ def get_embedding(texts):
             )
             hf_response = response.json()
         except requests.exceptions.ReadTimeout:
-            print("Response Timeout. Retry it")
             hf_response = {"timeout": True, "error": "Still Timeout"}
-
-        if ("timeout" in hf_response) & (k > 3):
             status = 504
+            print("Response Timeout. Retry it")
+
+        if (status == 504) & (k > 3):
             break
         elif isinstance(hf_response, list):
             status = 200
