@@ -1,11 +1,18 @@
+"""_summary_
+
+Raises:
+    ValueError: _description_
+
+Returns:
+    _type_: _description_
+"""
+
 import json
 import os
-import shutil
 import time
 
 import chromadb
 import geopandas as gpd
-import numpy as np
 import pandas as pd
 import requests
 import shortuuid
@@ -84,7 +91,18 @@ class chrmap:
         if len(self.shp_indo) == 0:
             raise ValueError("level options: `provinsi, kecamatan, kab_kota`")
 
+        self.data_map = None
+
     def insert(self, data, metric_col, area_col, store_path="temp_viz", tol=0.15):
+        """_summary_
+
+        Args:
+            data (_type_): data to be visualized
+            metric_col (_type_): metric to be visualized
+            area_col (_type_): _description_
+            store_path (str, optional): _description_. Defaults to "temp_viz".
+            tol (float, optional): _description_. Defaults to 0.15.
+        """
         # Check Path
         if not os.path.exists(store_path):
             os.makedirs(store_path)
@@ -117,9 +135,15 @@ class chrmap:
             used_kode_prov = df_null[df_null["pct_n"] <= tol].index.tolist()
 
             geojson = geojson[geojson.kode_prov.isin(used_kode_prov)]
-
         geojson_file = os.path.join(store_path, f"{chr_uuid}-data.geojson")
         geojson.to_file(geojson_file, driver="GeoJSON")
+        self.data_map = geojson.copy()
+        self.data_map["geometry"] = self.data_map["geometry"].apply(
+            lambda x: x.centroid
+        )
+        self.data_map["longitude"] = self.data_map["geometry"].apply(lambda x: x.x)
+        self.data_map["latitude"] = self.data_map["geometry"].apply(lambda x: x.y)
+        self.data_map = self.data_map.drop(columns=["geometry"])
 
         with open(geojson_file, "r") as f:
             geojson_data = json.load(f)

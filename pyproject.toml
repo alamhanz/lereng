@@ -1,15 +1,10 @@
-[build-system]
-requires = [
-    "setuptools>=60",
-    "setuptools-scm>=8.0"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "lereng"
-version = "0.0.8"
+version = "0.1.0"
 description = "Mapping Your Indonesia Data to Map. Without LatLong."
 authors = [
-    {name = "Alamsyah Hanza", email = "alamhanz@gmail.com"}
+    {name = "Alamsyah Hanza", email = "alamhanz@gmail.com"},
+    {name = "Alamsyah Koto Hanza", email = "alamhanz@gmail.com"},
 ]
 dependencies = [
     "geopandas==1.0.1",
@@ -18,7 +13,7 @@ dependencies = [
     "joblib",
     "jinja2",
     "shortuuid",
-    "ipython"
+    "ipython",
 ]
 license = {text = "MIT"}
 classifiers = [
@@ -26,12 +21,20 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent"
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 readme = "README.md"
 keywords = ["LLM", "AI", "machine learning", "geospatial"]
 urls = {"Homepage" = "https://alamhanz.xyz"}
 
-[tool.setuptools]
-# If there are data files included in your packages that need to be
-# installed, specify them here.
-packages = ["lereng"]
+[tool.pdm]
+distribution = true
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"lereng" = ["**/*"]
