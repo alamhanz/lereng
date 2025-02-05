@@ -142,8 +142,11 @@ class chrmap:
 
             geojson = geojson[geojson.kode_prov.isin(used_kode_prov)]
         geojson_file = os.path.join(store_path, f"{chr_uuid}-data.geojson")
-        geojson.to_file(geojson_file, driver="GeoJSON")
         self.data_map = geojson.copy()
+        geojson.to_file(geojson_file, driver="GeoJSON")
+
+        default_geometry = self.shp_indo[self.level].geometry.centroid.iloc[0]
+        self.data_map["geometry"] = self.data_map["geometry"].fillna(default_geometry)
         self.data_map["geometry"] = self.data_map["geometry"].apply(
             lambda x: x.centroid
         )
@@ -226,7 +229,7 @@ class areaname:
 
         all_area_dict.update(unknown_area_dict)
         df["normalized_area"] = df[area_col].apply(lambda x: all_area_dict[x])
-        df["is_already_normalized"] = df[area_col].isin(known_area)
+        df["need_normalized"] = ~(df[area_col].isin(known_area))
         return df
 
 
