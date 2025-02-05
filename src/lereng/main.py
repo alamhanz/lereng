@@ -51,13 +51,13 @@ def get_embedding(texts):
                 api_url,
                 headers=headers,
                 json={"inputs": texts, "options": {"wait_for_model": True}},
-                timeout=0.35,
+                timeout=0.4,
             )
             hf_response = response.json()
         except requests.exceptions.ReadTimeout:
             hf_response = {"timeout": True, "error": "Still Timeout"}
             status = 504
-            print("Response Timeout. Retry it")
+            logger.info("Response Timeout. Retry it")
 
         if (status == 504) & (k > 2):
             break
@@ -65,16 +65,16 @@ def get_embedding(texts):
             status = 200
             break
         else:
-            print("Wait before another request.")
+            logger.info("Wait before another request.")
             k += 1
             time.sleep(1)
 
     if "error" in hf_response:
         if status == 504:
-            print("Response Timeout.")
+            logger.info("Response Timeout.")
         else:
             status = 429
-            print(f"Reached Limit: {hf_response['error']}")
+            logger.info(f"Reached Limit: {hf_response['error']}")
         hf_response = []
 
     return status, hf_response
@@ -171,7 +171,7 @@ class chrmap:
             # Display the HTML content
             display(HTML(iframe_html))
         else:
-            print("No Map to Render. Do `insert` first.")
+            logger.info("No Map to Render. Do `insert` first.")
 
 
 class areaname:
@@ -213,9 +213,9 @@ class areaname:
         latest_api_status = 200
         for i in unknown_area:
             if latest_api_status != 504:
-                print(f"looking for: {i}")
+                logger.info(f"looking for: {i}")
                 candidate_norm = self.area_db.get_normalize(i, n_results=3)
-                print(f"Candidate Results: {candidate_norm}")
+                logger.info(f"Candidate Results: {candidate_norm}")
                 if len(candidate_norm) == 0:
                     unknown_area_dict[i] = i
                 else:
@@ -247,7 +247,7 @@ class areadb:
     def get_normalize(self, area, n_results=5):
         self.api_status, query_vector = get_embedding(area)
         if len(query_vector) == 0:
-            print("No Response")
+            logger.info("No Response")
             return []
 
         results = self.collection.query(
@@ -257,6 +257,4 @@ class areadb:
         )
         # results = self.collection.get(ids=["PR34"], include=["embeddings", "documents"])
         results = results["documents"][0]
-        return results
-        return results
         return results
