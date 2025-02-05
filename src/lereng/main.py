@@ -8,6 +8,7 @@ Returns:
 """
 
 import json
+import logging
 import os
 import time
 
@@ -19,10 +20,15 @@ import shortuuid
 from IPython.display import HTML, display
 from jinja2 import Environment, FileSystemLoader
 
+from .utils.common import logger_object
+
 PATH_ABS = os.path.dirname(os.path.abspath(__file__))
 PATH_MATERIALS = os.path.join(PATH_ABS, "materials")
 PATH_MAPS = os.path.join(PATH_ABS, "materials", "indonesia_maps")
 PATH_SAMPLE = os.path.join(PATH_ABS, "sample")
+
+logger_object("lereng")
+logger = logging.getLogger("askhanzo")
 
 
 def datasample(name):
@@ -45,7 +51,7 @@ def get_embedding(texts):
                 api_url,
                 headers=headers,
                 json={"inputs": texts, "options": {"wait_for_model": True}},
-                timeout=0.5,
+                timeout=0.35,
             )
             hf_response = response.json()
         except requests.exceptions.ReadTimeout:
@@ -53,7 +59,7 @@ def get_embedding(texts):
             status = 504
             print("Response Timeout. Retry it")
 
-        if (status == 504) & (k > 3):
+        if (status == 504) & (k > 2):
             break
         elif isinstance(hf_response, list):
             status = 200
@@ -204,14 +210,19 @@ class areaname:
 
         all_area_dict = dict(zip(known_area, known_area))
         unknown_area_dict = {}
+        latest_api_status = 200
         for i in unknown_area:
-            print(f"looking for: {i}")
-            candidate_norm = self.area_db.get_normalize(i, n_results=3)
-            print(f"Candidate Results: {candidate_norm}")
-            if len(candidate_norm) == 0:
-                unknown_area_dict[i] = i
+            if latest_api_status != 504:
+                print(f"looking for: {i}")
+                candidate_norm = self.area_db.get_normalize(i, n_results=3)
+                print(f"Candidate Results: {candidate_norm}")
+                if len(candidate_norm) == 0:
+                    unknown_area_dict[i] = i
+                else:
+                    unknown_area_dict[i] = candidate_norm[0]
+                latest_api_status = self.area_db.api_status
             else:
-                unknown_area_dict[i] = candidate_norm[0]
+                unknown_area_dict[i] = i
 
         all_area_dict.update(unknown_area_dict)
         df["normalized_area"] = df[area_col].apply(lambda x: all_area_dict[x])
@@ -246,4 +257,6 @@ class areadb:
         )
         # results = self.collection.get(ids=["PR34"], include=["embeddings", "documents"])
         results = results["documents"][0]
+        return results
+        return results
         return results
