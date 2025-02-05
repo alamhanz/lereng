@@ -28,7 +28,7 @@ PATH_MAPS = os.path.join(PATH_ABS, "materials", "indonesia_maps")
 PATH_SAMPLE = os.path.join(PATH_ABS, "sample")
 
 logger_object("lereng")
-logger = logging.getLogger("askhanzo")
+logger = logging.getLogger("lereng")
 
 
 def datasample(name):
